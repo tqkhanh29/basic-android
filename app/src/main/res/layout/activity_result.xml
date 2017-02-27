@@ -7,7 +7,12 @@
     android:orientation="vertical"
     android:padding="@dimen/activity_horizontal_margin"
     tools:context="com.lastroot.basic.ui.ResultActivity">
-
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/colorAccent"
+        android:text="Access Token: "
+        android:textSize="14sp"/>
     <TextView
         android:id="@+id/access_token_textview"
         android:layout_width="match_parent"

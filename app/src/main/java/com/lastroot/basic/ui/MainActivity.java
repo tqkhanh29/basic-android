@@ -1,5 +1,6 @@
 package com.lastroot.basic.ui;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputLayout;
@@ -12,6 +13,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.lastroot.basic.BasicApplication;
 import com.lastroot.basic.R;
+import com.lastroot.basic.model.NetworkError;
 import com.lastroot.basic.model.UserResponse;
 import com.lastroot.basic.model.User;
 import com.lastroot.basic.util.TextUtil;
@@ -45,6 +47,8 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.activity_main)
     RelativeLayout mMainLayout;
 
+    private ProgressDialog mProgressDialog;
+
     private Subscription mSubscription;
 
     private UserResponse mUserResponse;
@@ -55,6 +59,9 @@ public class MainActivity extends AppCompatActivity {
         mSubscription = Subscriptions.empty();
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
+        mProgressDialog = new ProgressDialog(this);
+        mProgressDialog.setCanceledOnTouchOutside(false);
+        mProgressDialog.setMessage("Login in");
     }
 
     @OnClick(R.id.login_button)
@@ -71,8 +78,8 @@ public class MainActivity extends AppCompatActivity {
             mPasswordLayout.setError("Please enter password");
             return;
         }
-
-        final User user = new User(email, password);
+        mProgressDialog.show();
+        final User user = new User(email.trim(), password.trim());
         mSubscription = BasicApplication.getUserRepository()
                                     .post(user)
                                     .subscribeOn(Schedulers.newThread())
@@ -82,6 +89,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void onCompleted() {
+        mProgressDialog.hide();
         if (mUserResponse != null) {
             Intent intent = ResultActivity.newIntent(this, mUserResponse);
             startActivity(intent);
@@ -89,13 +97,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void onError(Throwable e) {
+        mProgressDialog.hide();
         if (e instanceof HttpException) {
             Response<?> response = ((HttpException) e).response();
             Gson gson = new Gson();
 
             try {
                 String errorJson = response.errorBody().string();
-                Error error = gson.fromJson(errorJson, Error.class);
+                NetworkError error = gson.fromJson(errorJson, NetworkError.class);
                 Snackbar snackbar = Snackbar.make(mMainLayout, error.getMessage(), Snackbar.LENGTH_SHORT);
                 snackbar.show();
             } catch (JsonSyntaxException | IOException ex) {
@@ -106,6 +115,10 @@ public class MainActivity extends AppCompatActivity {
 
     private void onNext(UserResponse userResponse) {
         mUserResponse = userResponse;
+    }
+
+    private void showProgress() {
+
     }
 
     @Override
