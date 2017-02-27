@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Basic</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="login">Login</string>
+    <string name="endpoint">https://c0ban-api.com/</string>
+    <string name="success">Success</string>
+</resources>
